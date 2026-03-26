@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>תווי קניה — מנהל התווים שלי</title>
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi16rXldeV15kg16fXoNeZ15QiLCJzaG9ydF9uYW1lIjoi16rXldeV15nXnSIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGYwYzI5IiwidGhlbWVfY29sb3IiOiIjMzAyYjYzIn0=">
+<meta name="theme-color" content="#302b63">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg1:#0f0c29;--bg2:#302b63;--bg3:#24243e;
+--glass:rgba(255,255,255,0.06);--glass-border:rgba(255,255,255,0.12);
+--glass-hover:rgba(255,255,255,0.1);
+--text:#f0f0f0;--text-dim:rgba(255,255,255,0.55);
+--accent:#7c5cfc;--accent2:#00d2ff;
+--radius:18px;--radius-sm:12px;
+}
+html,body{height:100%;overflow:hidden}
+body{
+font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
+color:var(--text);direction:rtl;
+display:flex;flex-direction:column;
+}
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:4px}
+
+/* ===== HEADER ===== */
+.header{
+padding:16px 20px 12px;text-align:center;
+background:rgba(0,0,0,0.2);backdrop-filter:blur(20px);
+border-bottom:1px solid var(--glass-border);
+position:relative;z-index:10;flex-shrink:0;
+}
+.header h1{font-size:1.1rem;font-weight:700;margin-bottom:4px;
+background:linear-gradient(90deg,var(--accent),var(--accent2));
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.total-balance{font-size:2rem;font-weight:800;letter-spacing:-1px}
+.total-label{font-size:0.75rem;color:var(--text-dim);margin-top:2px}
+
+/* ===== MAIN CONTENT ===== */
+.main{flex:1;overflow-y:auto;overflow-x:hidden;padding:16px 16px 8px;scroll-behavior:smooth}
+
+/* ===== TAB BAR ===== */
+.tab-bar{
+display:flex;justify-content:space-around;align-items:center;
+padding:8px 4px 12px;
+background:rgba(0,0,0,0.35);backdrop-filter:blur(30px);
+border-top:1px solid var(--glass-border);flex-shrink:0;
+padding-bottom:max(12px,env(safe-area-inset-bottom));
+}
+.tab-btn{
+display:flex;flex-direction:column;align-items:center;gap:3px;
+background:none;border:none;color:var(--text-dim);
+font-size:0.65rem;cursor:pointer;padding:4px 8px;
+transition:all .25s ease;position:relative;font-family:inherit;
+}
+.tab-btn .tab-icon{font-size:1.35rem;transition:transform .25s ease}
+.tab-btn.active{color:var(--accent)}
+.tab-btn.active .tab-icon{transform:scale(1.15)}
+.tab-btn.active::after{
+content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);
+width:4px;height:4px;border-radius:50%;background:var(--accent);
+}
+.tab-btn:active{transform:scale(0.92)}
+
+/* ===== PAGES ===== */
+.page{display:none;animation:fadeIn .3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== GLASS CARD ===== */
+.glass{
+background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+border:1px solid var(--glass-border);border-radius:var(--radius);
+padding:16px;margin-bottom:12px;
+transition:all .3s ease;
+}
+.glass:hover{background:var(--glass-hover);transform:translateY(-1px);
+box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+
+/* ===== VOUCHER CARDS ===== */
+.voucher-card{position:relative;overflow:hidden;cursor:pointer}
+.voucher-card::before{
+content:'';position:absolute;top:0;right:0;width:4px;height:100%;
+border-radius:0 var(--radius) var(--radius) 0;
+}
+.vc-blue::before{background:linear-gradient(180deg,#4facfe,#00f2fe)}
+.vc-green::before{background:linear-gradient(180deg,#43e97b,#38f9d7)}
+.vc-orange::before{background:linear-gradient(180deg,#fa709a,#fee140)}
+.vc-pink::before{background:linear-gradient(180deg,#f093fb,#f5576c)}
+.vc-purple::before{background:linear-gradient(180deg,#7c5cfc,#c084fc)}
+.vc-gold::before{background:linear-gradient(180deg,#f7971e,#ffd200)}
+.voucher-card .vc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.voucher-card .vc-name{font-size:1rem;font-weight:700}
+.voucher-card .vc-balance{font-size:1.3rem;font-weight:800;direction:ltr;text-align:left}
+.voucher-card .vc-stores{font-size:0.72rem;color:var(--text-dim);line-height:1.5}
+.vc-bar{height:3px;border-radius:3px;background:rgba(255,255,255,0.08);margin-top:10px;overflow:hidden}
+.vc-bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.vc-blue .vc-bar-fill{background:linear-gradient(90deg,#4facfe,#00f2fe)}
+.vc-green .vc-bar-fill{background:linear-gradient(90deg,#43e97b,#38f9d7)}
+.vc-orange .vc-bar-fill{background:linear-gradient(90deg,#fa709a,#fee140)}
+.vc-pink .vc-bar-fill{background:linear-gradient(90deg,#f093fb,#f5576c)}
+.vc-purple .vc-bar-fill{background:linear-gradient(90deg,#7c5cfc,#c084fc)}
+.vc-gold .vc-bar-fill{background:linear-gradient(90deg,#f7971e,#ffd200)}
+
+/* ===== SECTION TITLE ===== */
+.section-title{font-size:0.85rem;font-weight:600;margin-bottom:12px;color:var(--text-dim)}
+
+/* ===== SEARCH / INPUT ===== */
+.search-box{
+display:flex;align-items:center;gap:10px;
+background:var(--glass);backdrop-filter:blur(16px);
+border:1px solid var(--glass-border);border-radius:var(--radius);
+padding:12px 16px;margin-bottom:16px;
+transition:border-color .3s;
+}
+.search-box:focus-within{border-color:var(--accent)}
+.search-box input{
+flex:1;background:none;border:none;outline:none;
+color:var(--text);font-size:0.95rem;font-family:inherit;
+}
+.search-box input::placeholder{color:var(--text-dim)}
+
+/* ===== STORE RESULTS ===== */
+.store-result{
+display:flex;align-items:center;gap:12px;
+padding:14px 16px;
+}
+.store-result .sr-color{width:36px;height:36px;border-radius:10px;display:flex;
+align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.sr-blue{background:rgba(79,172,254,0.2)}
+.sr-green{background:rgba(67,233,123,0.2)}
+.sr-orange{background:rgba(250,112,154,0.2)}
+.sr-pink{background:rgba(240,147,251,0.2)}
+.sr-purple{background:rgba(124,92,252,0.2)}
+.sr-gold{background:rgba(247,151,30,0.2)}
+.store-result .sr-info{flex:1}
+.store-result .sr-name{font-size:0.9rem;font-weight:600}
+.store-result .sr-bal{font-size:0.75rem;color:var(--text-dim)}
+.store-result .sr-amount{font-size:1.1rem;font-weight:700;direction:ltr}
+
+/* ===== CHAT ===== */
+.chat-container{display:flex;flex-direction:column;height:calc(100vh - 180px)}
+.chat-messages{flex:1;overflow-y:auto;padding:8px 0;display:flex;flex-direction:column;gap:8px}
+.chat-bubble{
+max-width:82%;padding:10px 14px;border-radius:16px;
+font-size:0.88rem;line-height:1.55;word-wrap:break-word;
+animation:bubbleIn .3s ease;
+}
+@keyframes bubbleIn{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}
+.chat-bubble.user{
+align-self:flex-start;
+background:linear-gradient(135deg,var(--accent),#5b3cc4);
+border-bottom-right-radius:4px;
+}
+.chat-bubble.assistant{
+align-self:flex-end;
+background:var(--glass);border:1px solid var(--glass-border);
+border-bottom-left-radius:4px;
+}
+.chat-bubble.assistant pre{white-space:pre-wrap;font-family:inherit}
+.chat-input-row{
+display:flex;gap:8px;padding-top:10px;
+}
+.chat-input-row input{
+flex:1;background:var(--glass);border:1px solid var(--glass-border);
+border-radius:24px;padding:10px 16px;color:var(--text);
+font-size:0.9rem;outline:none;font-family:inherit;
+transition:border-color .3s;
+}
+.chat-input-row input:focus{border-color:var(--accent)}
+.send-btn{
+width:42px;height:42px;border-radius:50%;border:none;
+background:linear-gradient(135deg,var(--accent),#5b3cc4);
+color:#fff;font-size:1.2rem;cursor:pointer;
+display:flex;align-items:center;justify-content:center;
+transition:transform .2s;flex-shrink:0;
+}
+.send-btn:active{transform:scale(0.9)}
+.typing-indicator{color:var(--text-dim);font-size:0.8rem;padding:4px 0}
+
+/* ===== SETTINGS ===== */
+.setting-group{margin-bottom:16px}
+.setting-label{font-size:0.8rem;color:var(--text-dim);margin-bottom:6px}
+.setting-input{
+width:100%;background:rgba(255,255,255,0.04);
+border:1px solid var(--glass-border);border-radius:var(--radius-sm);
+padding:10px 14px;color:var(--text);font-size:0.9rem;
+outline:none;font-family:inherit;transition:border-color .3s;
+}
+.setting-input:focus{border-color:var(--accent)}
+
+/* ===== BUTTONS ===== */
+.btn{
+display:inline-flex;align-items:center;justify-content:center;gap:6px;
+padding:10px 20px;border-radius:var(--radius-sm);border:none;
+font-size:0.85rem;font-weight:600;cursor:pointer;
+transition:all .25s ease;font-family:inherit;
+}
+.btn:active{transform:scale(0.96)}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#5b3cc4);color:#fff}
+.btn-primary:hover{box-shadow:0 4px 20px rgba(124,92,252,0.4)}
+.btn-danger{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.2)}
+.btn-ghost{background:var(--glass);color:var(--text);border:1px solid var(--glass-border)}
+.btn-sm{padding:6px 14px;font-size:0.78rem;border-radius:8px}
+
+/* ===== HISTORY ===== */
+.history-item{display:flex;align-items:center;gap:12px;padding:12px 16px}
+.history-item .hi-icon{font-size:1.4rem}
+.history-item .hi-info{flex:1}
+.history-item .hi-store{font-size:0.88rem;font-weight:600}
+.history-item .hi-meta{font-size:0.72rem;color:var(--text-dim)}
+.history-item .hi-amount{font-size:1rem;font-weight:700;color:#ef4444;direction:ltr}
+
+/* ===== MODAL ===== */
+.modal-overlay{
+position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);
+z-index:100;display:flex;align-items:flex-end;justify-content:center;
+animation:fadeIn .2s ease;
+}
+.modal{
+background:linear-gradient(180deg,#1a1744,#151234);
+border-radius:var(--radius) var(--radius) 0 0;
+width:100%;max-width:500px;max-height:80vh;overflow-y:auto;
+padding:20px;border:1px solid var(--glass-border);
+animation:slideUp .3s ease;
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal h3{margin-bottom:16px;font-size:1rem}
+.modal-close{
+position:absolute;top:12px;left:12px;background:none;border:none;
+color:var(--text-dim);font-size:1.2rem;cursor:pointer;
+}
+
+/* ===== TAGS ===== */
+.tag{
+display:inline-block;padding:4px 10px;border-radius:20px;
+font-size:0.72rem;margin:2px;
+background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+cursor:pointer;transition:all .2s;
+}
+.tag:hover{background:rgba(124,92,252,0.2);border-color:var(--accent)}
+.tag.active{background:rgba(124,92,252,0.3);border-color:var(--accent)}
+
+/* ===== EMPTY STATE ===== */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-dim)}
+.empty-state .es-icon{font-size:3rem;margin-bottom:12px}
+.empty-state .es-text{font-size:0.9rem}
+
+/* ===== PURCHASE FORM ===== */
+.purchase-form{display:flex;flex-direction:column;gap:10px}
+.purchase-form select{
+width:100%;background:rgba(255,255,255,0.04);
+border:1px solid var(--glass-border);border-radius:var(--radius-sm);
+padding:10px 14px;color:var(--text);font-size:0.9rem;
+outline:none;font-family:inherit;appearance:none;
+}
+.purchase-form option{background:#1a1744;color:var(--text)}
+
+/* ===== AI SUGGESTIONS ===== */
+.ai-suggestion{
+background:linear-gradient(135deg,rgba(124,92,252,0.1),rgba(0,210,255,0.05));
+border:1px solid rgba(124,92,252,0.2);border-radius:var(--radius);
+padding:14px;margin-bottom:10px;
+}
+.ai-suggestion .ai-label{font-size:0.72rem;color:var(--accent);margin-bottom:6px;font-weight:600}
+.ai-suggestion .ai-text{font-size:0.85rem;line-height:1.6}
+
+/* ===== NO API KEY ===== */
+.no-key-msg{
+text-align:center;padding:30px;color:var(--text-dim);font-size:0.85rem;
+}
+.no-key-msg a{color:var(--accent);text-decoration:none}
+
+/* Responsive */
+@media(min-width:600px){
+  .main{max-width:540px;margin:0 auto;width:100%}
+  .voucher-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .voucher-grid .glass{margin-bottom:0}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>🎫 מנהל התווים שלי</h1>
+  <div class="total-balance" id="totalBalance">0 ₪</div>
+  <div class="total-label">סך כל היתרות</div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main" id="mainContent">
+
+  <!-- PAGE: DASHBOARD -->
+  <div class="page active" id="pageDashboard">
+    <div class="section-title">💳 התווים שלי</div>
+    <div class="voucher-grid" id="voucherGrid"></div>
+    <div style="margin-top:8px">
+      <div class="section-title">📊 היסטוריית רכישות אחרונות</div>
+      <div id="recentHistory"></div>
+    </div>
+  </div>
+
+  <!-- PAGE: STORE -->
+  <div class="page" id="pageStore">
+    <div class="section-title">🏪 אני בחנות — באיזה תו אפשר לשלם?</div>
+    <div class="search-box">
+      <span>🔍</span>
+      <input type="text" id="storeSearch" placeholder="הקלד שם חנות..." autocomplete="off">
+    </div>
+    <div class="section-title" style="font-size:0.75rem">חנויות פופולריות</div>
+    <div id="popularStores" style="margin-bottom:16px"></div>
+    <div id="storeResults"></div>
+  </div>
+
+  <!-- PAGE: BUY -->
+  <div class="page" id="pageBuy">
+    <div class="section-title">🛍️ אני רוצה לקנות</div>
+    <div class="search-box">
+      <span>✨</span>
+      <input type="text" id="buySearch" placeholder="מה אתה רוצה לקנות? (למשל: נעלי ריצה)" autocomplete="off">
+    </div>
+    <div id="buyResults"></div>
+    <div style="margin-top:20px">
+      <div class="section-title">📝 רישום רכישה</div>
+      <div class="glass">
+        <div class="purchase-form" id="purchaseForm">
+          <input type="text" class="setting-input" id="purchaseStore" placeholder="שם החנות">
+          <input type="number" class="setting-input" id="purchaseAmount" placeholder="סכום ₪" min="0">
+          <select id="purchaseVoucher"></select>
+          <button class="btn btn-primary" onclick="addPurchase()" style="width:100%">➕ רשום רכישה</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: CHAT -->
+  <div class="page" id="pageChat">
+    <div class="chat-container">
+      <div class="chat-messages" id="chatMessages">
+        <div class="chat-bubble assistant">שלום! 👋 אני העוזר החכם שלך לתווי קניה. שאל אותי כל שאלה — באיזה חנות אפשר לשלם, איך לנצל את התווים בצורה הכי חכמה, או כל דבר אחר!</div>
+      </div>
+      <div id="typingIndicator" class="typing-indicator" style="display:none">🤖 חושב...</div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="שאל אותי משהו..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="send-btn" onclick="sendChat()">⬆️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: SETTINGS -->
+  <div class="page" id="pageSettings">
+    <div class="section-title">⚙️ הגדרות</div>
+
+    <div class="glass">
+      <div class="setting-group">
+        <div class="setting-label">🔑 מפתח OpenAI API</div>
+        <input type="password" class="setting-input" id="apiKeyInput" placeholder="sk-..." oninput="saveApiKey()">
+        <div style="font-size:0.7rem;color:var(--text-dim);margin-top:4px">המפתח נשמר מקומית בדפדפן בלבד</div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:16px">✏️ עריכת תווים</div>
+    <div id="editVouchers"></div>
+    <button class="btn btn-primary" onclick="showAddVoucherModal()" style="width:100%;margin-top:8px">➕ הוסף תו חדש</button>
+
+    <div class="section-title" style="margin-top:20px">📜 היסטוריית רכישות מלאה</div>
+    <div id="fullHistory"></div>
+    <button class="btn btn-danger btn-sm" onclick="clearHistory()" style="margin-top:8px" id="clearHistoryBtn">🗑️ נקה היסטוריה</button>
+
+    <div style="text-align:center;margin-top:30px;padding-bottom:20px">
+      <div style="font-size:0.7rem;color:var(--text-dim)">תווי קניה v1.0 — כל הנתונים מאוחסנים מקומית</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('Dashboard')" data-tab="Dashboard">
+    <span class="tab-icon">📊</span>דשבורד
+  </button>
+  <button class="tab-btn" onclick="switchTab('Store')" data-tab="Store">
+    <span class="tab-icon">🏪</span>חנות
+  </button>
+  <button class="tab-btn" onclick="switchTab('Buy')" data-tab="Buy">
+    <span class="tab-icon">🛍️</span>קניה
+  </button>
+  <button class="tab-btn" onclick="switchTab('Chat')" data-tab="Chat">
+    <span class="tab-icon">💬</span>צ׳אט
+  </button>
+  <button class="tab-btn" onclick="switchTab('Settings')" data-tab="Settings">
+    <span class="tab-icon">⚙️</span>הגדרות
+  </button>
+</div>
+
+<!-- MODAL CONTAINER -->
+<div id="modalContainer"></div>
+
+<script>
+// ===== DEFAULT DATA =====
+const DEFAULT_VOUCHERS = [
+  {
+    id:'ashmoret', name:'אשמורת המורים', balance:700, color:'blue', emoji:'🎓',
+    stores:['גולדברי','בוב בראון','MAC','סטימצקי','בית צומח','פמינה','סול תם','אונוט']
+  },
+  {
+    id:'dreamcard', name:'דרים קארד (Fox)', balance:4500, color:'green', emoji:'🦊',
+    stores:['FOX','FOX HOME','American Eagle','Aerie','Mango','Foot Locker','Terminal X','Ruby Bay','Flying Tiger','Sunglass Hut','Billabong','Quiksilver','Laline','שילב','The Children\'s Place','Jumbo']
+  },
+  {
+    id:'loaded', name:'כרטיס נטען', balance:1100, color:'orange', emoji:'💳',
+    stores:['_everywhere_']
+  },
+  {
+    id:'ramilevi', name:'כרטיס רמי לוי', balance:1000, color:'pink', emoji:'🛒',
+    stores:['רמי לוי','שופרסל','המשביר','Home Center','Doble','שיקום חשמל','Ricochet','Mega Sport','אלדו','גלי','פפאיה','יינות ביתן']
+  },
+  {
+    id:'buyme', name:'Buy Me', balance:1500, color:'purple', emoji:'🎁',
+    stores:['Adidas','SOHO','Kyoto','MAC','Shopra','LEGO','ATA','Raviva','Cilia']
+  },
+  {
+    id:'gold', name:'תו הזהב', balance:1350, color:'gold', emoji:'🏅',
+    stores:['שופרסל','Be','FOX','Golf','Intima','Delta','TNT','ACE','H&O','Renuar','Adidas','Castro','Mega Sport','צומת ספרים','סטימצקי','Ricochet','Mango','מסעדות']
+  }
+];
+
+// ===== STATE =====
+let vouchers = JSON.parse(localStorage.getItem('vouchers')) || JSON.parse(JSON.stringify(DEFAULT_VOUCHERS));
+let history = JSON.parse(localStorage.getItem('purchaseHistory')) || [];
+let chatHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
+let apiKey = localStorage.getItem('openai_api_key') || '';
+
+// ===== SAVE =====
+function save(){
+  localStorage.setItem('vouchers', JSON.stringify(vouchers));
+  localStorage.setItem('purchaseHistory', JSON.stringify(history));
+  localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+}
+function saveApiKey(){
+  apiKey = document.getElementById('apiKeyInput').value.trim();
+  localStorage.setItem('openai_api_key', apiKey);
+}
+
+// ===== NAVIGATION =====
+function switchTab(tab){
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page'+tab).classList.add('active');
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  if(tab==='Settings') renderSettings();
+  if(tab==='Dashboard') renderDashboard();
+  if(tab==='Store') document.getElementById('storeSearch').focus();
+  if(tab==='Buy') renderBuyPage();
+  if(tab==='Chat') {
+    renderChat();
+    setTimeout(()=>document.getElementById('chatInput').focus(),100);
+  }
+}
+
+// ===== TOTAL BALANCE =====
+function updateTotal(){
+  const total = vouchers.reduce((s,v)=>s+v.balance,0);
+  document.getElementById('totalBalance').textContent = total.toLocaleString('he-IL') + ' ₪';
+}
+
+// ===== DASHBOARD =====
+function renderDashboard(){
+  updateTotal();
+  const maxBal = Math.max(...vouchers.map(v=>v.balance),1);
+  const grid = document.getElementById('voucherGrid');
+  grid.innerHTML = vouchers.map(v=>`
+    <div class="glass voucher-card vc-${v.color}" onclick="showVoucherDetail('${v.id}')">
+      <div class="vc-top">
+        <div>
+          <div class="vc-name">${v.emoji} ${v.name}</div>
+        </div>
+        <div class="vc-balance">${v.balance.toLocaleString('he-IL')} ₪</div>
+      </div>
+      <div class="vc-stores">${v.stores[0]==='_everywhere_'?'✅ מתקבל בכל מקום':v.stores.slice(0,5).join(' · ')+(v.stores.length>5?' +עוד':'')}</div>
+      <div class="vc-bar"><div class="vc-bar-fill" style="width:${(v.balance/maxBal*100).toFixed(1)}%"></div></div>
+    </div>
+  `).join('');
+
+  const recent = history.slice(-3).reverse();
+  const rh = document.getElementById('recentHistory');
+  if(!recent.length){
+    rh.innerHTML = '<div class="empty-state"><div class="es-icon">🛒</div><div class="es-text">אין רכישות עדיין</div></div>';
+  } else {
+    rh.innerHTML = recent.map(h=>{
+      const v = vouchers.find(x=>x.id===h.voucherId);
+      return `<div class="glass history-item">
+        <div class="hi-icon">${v?v.emoji:'🧾'}</div>
+        <div class="hi-info">
+          <div class="hi-store">${h.store}</div>
+          <div class="hi-meta">${v?v.name:'—'} · ${new Date(h.date).toLocaleDateString('he-IL')}</div>
+        </div>
+        <div class="hi-amount">-${h.amount.toLocaleString('he-IL')} ₪</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ===== VOUCHER DETAIL =====
+function showVoucherDetail(id){
+  const v = vouchers.find(x=>x.id===id);
+  if(!v) return;
+  const purchases = history.filter(h=>h.voucherId===id).reverse();
+  document.getElementById('modalContainer').innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>${v.emoji} ${v.name}</h3>
+        <div style="text-align:center;margin-bottom:16px">
+          <div style="font-size:2.2rem;font-weight:800">${v.balance.toLocaleString('he-IL')} ₪</div>
+          <div style="font-size:0.8rem;color:var(--text-dim)">יתרה נוכחית</div>
+        </div>
+        <div class="section-title">חנויות מקבלות</div>
+        <div style="margin-bottom:16px">${v.stores[0]==='_everywhere_'?'<div style="color:#43e97b;font-size:0.9rem">✅ מתקבל בכל חנות ועסק</div>':v.stores.map(s=>`<span class="tag">${s}</span>`).join('')}</div>
+        ${purchases.length?`
+          <div class="section-title">רכישות אחרונות</div>
+          ${purchases.slice(0,5).map(h=>`
+            <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--glass-border);font-size:0.85rem">
+              <span>${h.store}</span>
+              <span style="color:#ef4444;direction:ltr">-${h.amount} ₪</span>
+            </div>
+          `).join('')}
+        `:''}
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button class="btn btn-ghost" onclick="closeModal()" style="flex:1">סגור</button>
+          <button class="btn btn-primary" onclick="closeModal();switchTab('Store')" style="flex:1">🏪 חפש חנות</button>
+        </div>
+      </div>
+    </div>`;
+}
+function closeModal(){ document.getElementById('modalContainer').innerHTML=''; }
+
+// ===== STORE SEARCH =====
+const storeSearchInput = document.getElementById('storeSearch');
+storeSearchInput.addEventListener('input', ()=> searchStore(storeSearchInput.value));
+
+function getAllStores(){
+  const storeMap = {};
+  vouchers.forEach(v=>{
+    if(v.stores[0]==='_everywhere_') return;
+    v.stores.forEach(s=>{
+      const key = s.toLowerCase();
+      if(!storeMap[key]) storeMap[key] = {name:s, vouchers:[]};
+      storeMap[key].vouchers.push(v);
+    });
+  });
+  return storeMap;
+}
+
+function searchStore(query){
+  const results = document.getElementById('storeResults');
+  if(!query.trim()){results.innerHTML='';return;}
+  const q = query.trim().toLowerCase();
+  // Find matching vouchers
+  let matched = [];
+  // Check for "everywhere" vouchers
+  const everywhereVouchers = vouchers.filter(v=>v.stores[0]==='_everywhere_');
+  vouchers.forEach(v=>{
+    if(v.stores[0]==='_everywhere_') return;
+    const found = v.stores.some(s=>s.toLowerCase().includes(q));
+    if(found) matched.push(v);
+  });
+  // Add everywhere vouchers
+  matched = [...matched, ...everywhereVouchers];
+  // Sort by balance desc
+  matched.sort((a,b)=>b.balance-a.balance);
+
+  if(!matched.length){
+    results.innerHTML = `<div class="empty-state"><div class="es-icon">🤷</div><div class="es-text">לא נמצא תו מתאים ל"${query}"</div></div>`;
+    return;
+  }
+  results.innerHTML = `<div class="section-title">תווים שמתקבלים ב"${query}"</div>` +
+    matched.map(v=>`
+      <div class="glass store-result">
+        <div class="sr-color sr-${v.color}">${v.emoji}</div>
+        <div class="sr-info">
+          <div class="sr-name">${v.name}</div>
+          <div class="sr-bal">${v.stores[0]==='_everywhere_'?'מתקבל בכל מקום':'מתקבל בחנות זו'}</div>
+        </div>
+        <div class="sr-amount">${v.balance.toLocaleString('he-IL')} ₪</div>
+      </div>
+    `).join('');
+}
+
+// Popular stores
+function renderPopularStores(){
+  const popular = ['שופרסל','FOX','Adidas','MAC','סטימצקי','Mango','Castro','LEGO','רמי לוי','Home Center'];
+  document.getElementById('popularStores').innerHTML = popular.map(s=>
+    `<span class="tag" onclick="document.getElementById('storeSearch').value='${s}';searchStore('${s}')">${s}</span>`
+  ).join('');
+}
+renderPopularStores();
+
+// ===== BUY PAGE =====
+function renderBuyPage(){
+  const sel = document.getElementById('purchaseVoucher');
+  sel.innerHTML = '<option value="">בחר תו קניה...</option>' +
+    vouchers.map(v=>`<option value="${v.id}">${v.emoji} ${v.name} (${v.balance.toLocaleString('he-IL')} ₪)</option>`).join('');
+}
+
+const buySearchInput = document.getElementById('buySearch');
+buySearchInput.addEventListener('keydown', e=>{ if(e.key==='Enter') searchBuy(); });
+
+async function searchBuy(){
+  const query = buySearchInput.value.trim();
+  if(!query) return;
+  const results = document.getElementById('buyResults');
+  if(!apiKey){
+    results.innerHTML = `<div class="no-key-msg">🔑 יש להזין מפתח OpenAI API ב<a href="#" onclick="switchTab('Settings')">הגדרות</a> כדי להשתמש בתכונה זו</div>`;
+    return;
+  }
+  results.innerHTML = '<div class="ai-suggestion"><div class="ai-label">🤖 מחפש...</div><div class="ai-text">מנתח את הבקשה ומחפש חנויות מתאימות...</div></div>';
+
+  const vData = vouchers.map(v=>({name:v.name,balance:v.balance,stores:v.stores}));
+  const prompt = `המשתמש רוצה לקנות: "${query}"\n\nנתוני תווי הקניה שלו:\n${JSON.stringify(vData,null,2)}\n\nהצע באילו חנויות אפשר לקנות את זה ובאילו תווים לשלם. תן עדיפות לתווים עם היתרה הגבוהה ביותר. ענה בעברית בצורה ברורה וקצרה. אם "כרטיס נטען" רלוונטי (stores: ["_everywhere_"]) — ציין שהוא מתקבל בכל מקום.`;
+
+  try{
+    const resp = await callOpenAI(prompt, 'אתה יועץ קניות חכם שעוזר למשתמש לנצל את תווי הקניה שלו בצורה אופטימלית. ענה בעברית.');
+    results.innerHTML = `<div class="ai-suggestion"><div class="ai-label">✨ המלצת AI</div><div class="ai-text">${formatAIText(resp)}</div></div>`;
+  }catch(e){
+    results.innerHTML = `<div class="ai-suggestion"><div class="ai-label">❌ שגיאה</div><div class="ai-text">${e.message}</div></div>`;
+  }
+}
+
+// ===== PURCHASE =====
+function addPurchase(){
+  const store = document.getElementById('purchaseStore').value.trim();
+  const amount = parseFloat(document.getElementById('purchaseAmount').value);
+  const voucherId = document.getElementById('purchaseVoucher').value;
+  if(!store || !amount || !voucherId){alert('יש למלא את כל השדות');return;}
+  const v = vouchers.find(x=>x.id===voucherId);
+  if(!v){alert('תו לא נמצא');return;}
+  if(amount > v.balance){alert(`היתרה בתו "${v.name}" היא ${v.balance} ₪ בלבד`);return;}
+  v.balance -= amount;
+  history.push({store, amount, voucherId, date: new Date().toISOString()});
+  save();
+  document.getElementById('purchaseStore').value='';
+  document.getElementById('purchaseAmount').value='';
+  document.getElementById('purchaseVoucher').value='';
+  updateTotal();
+  renderBuyPage();
+  // Show success
+  const btn = document.querySelector('#purchaseForm .btn-primary');
+  const orig = btn.textContent;
+  btn.textContent = '✅ נרשם!';
+  btn.style.background = 'linear-gradient(135deg,#43e97b,#38f9d7)';
+  setTimeout(()=>{btn.textContent=orig;btn.style.background='';},1500);
+}
+
+// ===== CHAT =====
+function renderChat(){
+  const container = document.getElementById('chatMessages');
+  if(chatHistory.length){
+    container.innerHTML = chatHistory.map(m=>
+      `<div class="chat-bubble ${m.role==='user'?'user':'assistant'}">${formatAIText(m.content)}</div>`
+    ).join('');
+  }
+  container.scrollTop = container.scrollHeight;
+}
+
+async function sendChat(){
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  if(!apiKey){
+    alert('יש להזין מפתח OpenAI API בהגדרות');
+    switchTab('Settings');
+    return;
+  }
+  input.value = '';
+  chatHistory.push({role:'user',content:msg});
+  save();
+  renderChat();
+
+  const indicator = document.getElementById('typingIndicator');
+  indicator.style.display = 'block';
+  const container = document.getElementById('chatMessages');
+  container.scrollTop = container.scrollHeight;
+
+  const vData = vouchers.map(v=>({name:v.name,balance:v.balance,stores:v.stores}));
+  const histData = history.slice(-10).map(h=>({store:h.store,amount:h.amount,voucher:vouchers.find(v=>v.id===h.voucherId)?.name,date:h.date}));
+  const systemPrompt = `אתה עוזר חכם לניהול תווי קניה. ענה בעברית.
+
+נתוני התווים של המשתמש:
+${JSON.stringify(vData,null,2)}
+
+רכישות אחרונות:
+${JSON.stringify(histData,null,2)}
+
+סך כל היתרות: ${vouchers.reduce((s,v)=>s+v.balance,0)} ₪
+
+הערה: תו "כרטיס נטען" עם stores: ["_everywhere_"] מתקבל בכל חנות ועסק.
+עזור למשתמש לנצל את התווים בצורה אופטימלית. ענה בצורה ידידותית וקצרה.`;
+
+  // Build conversation for context
+  const messages = chatHistory.slice(-10).map(m=>({role:m.role==='user'?'user':'assistant',content:m.content}));
+
+  try{
+    const resp = await callOpenAI(messages, systemPrompt);
+    chatHistory.push({role:'assistant',content:resp});
+    save();
+  }catch(e){
+    chatHistory.push({role:'assistant',content:'❌ שגיאה: '+e.message});
+    save();
+  }
+  indicator.style.display='none';
+  renderChat();
+}
+
+async function callOpenAI(messagesOrPrompt, systemPrompt){
+  let messages;
+  if(typeof messagesOrPrompt === 'string'){
+    messages = [{role:'user',content:messagesOrPrompt}];
+  } else {
+    messages = messagesOrPrompt;
+  }
+  const body = {
+    model:'gpt-4o',
+    messages:[{role:'system',content:systemPrompt},...messages],
+    max_tokens:800,
+    temperature:0.7
+  };
+  const resp = await fetch('https://api.openai.com/v1/chat/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+    body:JSON.stringify(body)
+  });
+  if(!resp.ok){
+    const err = await resp.json().catch(()=>({}));
+    throw new Error(err.error?.message || 'שגיאת API ('+resp.status+')');
+  }
+  const data = await resp.json();
+  return data.choices[0].message.content;
+}
+
+function formatAIText(text){
+  return text
+    .replace(/\n/g,'<br>')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/`(.*?)`/g,'<code style="background:rgba(255,255,255,0.1);padding:1px 4px;border-radius:4px">$1</code>');
+}
+
+// ===== SETTINGS =====
+function renderSettings(){
+  document.getElementById('apiKeyInput').value = apiKey;
+  const container = document.getElementById('editVouchers');
+  container.innerHTML = vouchers.map((v,i)=>`
+    <div class="glass" style="display:flex;align-items:center;gap:10px">
+      <div style="font-size:1.4rem">${v.emoji}</div>
+      <div style="flex:1">
+        <div style="font-size:0.88rem;font-weight:600">${v.name}</div>
+        <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+          <input type="number" class="setting-input" style="width:100px;padding:6px 10px;font-size:0.85rem"
+            value="${v.balance}" min="0" onchange="updateBalance(${i},this.value)">
+          <span style="font-size:0.8rem;color:var(--text-dim)">₪</span>
+        </div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="removeVoucher(${i})">🗑️</button>
+    </div>
+  `).join('');
+
+  // Full history
+  const fh = document.getElementById('fullHistory');
+  if(!history.length){
+    fh.innerHTML = '<div class="glass"><div style="text-align:center;color:var(--text-dim);font-size:0.85rem;padding:10px">אין רכישות</div></div>';
+    document.getElementById('clearHistoryBtn').style.display='none';
+  } else {
+    document.getElementById('clearHistoryBtn').style.display='';
+    fh.innerHTML = history.slice().reverse().map(h=>{
+      const v=vouchers.find(x=>x.id===h.voucherId);
+      return `<div class="glass history-item">
+        <div class="hi-icon">${v?v.emoji:'🧾'}</div>
+        <div class="hi-info">
+          <div class="hi-store">${h.store}</div>
+          <div class="hi-meta">${v?v.name:'תו שנמחק'} · ${new Date(h.date).toLocaleDateString('he-IL')}</div>
+        </div>
+        <div class="hi-amount">-${h.amount.toLocaleString('he-IL')} ₪</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function updateBalance(index, val){
+  vouchers[index].balance = Math.max(0, parseFloat(val)||0);
+  save(); updateTotal();
+}
+
+function removeVoucher(index){
+  if(!confirm(`למחוק את "${vouchers[index].name}"?`)) return;
+  vouchers.splice(index,1);
+  save(); updateTotal(); renderSettings();
+}
+
+function clearHistory(){
+  if(!confirm('למחוק את כל היסטוריית הרכישות?')) return;
+  history=[];save();renderSettings();renderDashboard();
+}
+
+// ===== ADD VOUCHER MODAL =====
+function showAddVoucherModal(){
+  const colors = ['blue','green','orange','pink','purple','gold'];
+  const emojis = ['💳','🎫','🎁','🏷️','🛒','🎟️','💰','🪙'];
+  document.getElementById('modalContainer').innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>➕ הוספת תו חדש</h3>
+        <div class="setting-group">
+          <div class="setting-label">שם התו</div>
+          <input type="text" class="setting-input" id="newVName" placeholder="למשל: גיפט קארד">
+        </div>
+        <div class="setting-group">
+          <div class="setting-label">יתרה (₪)</div>
+          <input type="number" class="setting-input" id="newVBalance" placeholder="0" min="0">
+        </div>
+        <div class="setting-group">
+          <div class="setting-label">חנויות (מופרדות בפסיק)</div>
+          <input type="text" class="setting-input" id="newVStores" placeholder="חנות 1, חנות 2, חנות 3">
+        </div>
+        <div class="setting-group">
+          <div class="setting-label">צבע</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            ${colors.map(c=>`<div onclick="document.querySelectorAll('.color-pick').forEach(x=>x.style.outline='');this.style.outline='2px solid white';document.getElementById('newVColor').value='${c}'" class="color-pick sr-${c}" style="width:32px;height:32px;border-radius:8px;cursor:pointer"></div>`).join('')}
+          </div>
+          <input type="hidden" id="newVColor" value="blue">
+        </div>
+        <div class="setting-group">
+          <div class="setting-label">אימוג'י</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            ${emojis.map(e=>`<span onclick="document.getElementById('newVEmoji').value='${e}';document.querySelectorAll('.emoji-pick').forEach(x=>x.style.background='');this.style.background='var(--accent)'" class="emoji-pick" style="font-size:1.4rem;cursor:pointer;padding:4px 6px;border-radius:8px;transition:background .2s">${e}</span>`).join('')}
+          </div>
+          <input type="hidden" id="newVEmoji" value="💳">
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button class="btn btn-ghost" onclick="closeModal()" style="flex:1">ביטול</button>
+          <button class="btn btn-primary" onclick="addVoucher()" style="flex:1">✅ הוסף</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function addVoucher(){
+  const name = document.getElementById('newVName').value.trim();
+  const balance = parseFloat(document.getElementById('newVBalance').value) || 0;
+  const storesRaw = document.getElementById('newVStores').value.trim();
+  const color = document.getElementById('newVColor').value;
+  const emoji = document.getElementById('newVEmoji').value;
+  if(!name){alert('יש להזין שם');return;}
+  const stores = storesRaw ? storesRaw.split(',').map(s=>s.trim()).filter(Boolean) : ['_everywhere_'];
+  const id = 'v_' + Date.now();
+  vouchers.push({id, name, balance, color, emoji, stores});
+  save(); closeModal(); updateTotal(); renderSettings();
+}
+
+// ===== INIT =====
+updateTotal();
+renderDashboard();
+renderBuyPage();
+
+// Service Worker registration for PWA (no-op if not available)
+if('serviceWorker' in navigator){
+  // Minimal SW not needed for single file, but manifest is set
+}
+</script>
+</body>
+</html>
